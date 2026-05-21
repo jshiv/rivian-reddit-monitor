@@ -30,16 +30,13 @@ Set both in the cronicle UI (Project → Secrets) before the first run:
 
 ## Runtime expectations of the cronicled container
 
-The pipeline assumes the standard cronicled task container has:
+`install_deps` runs `scripts/setup.sh` which is **fully self-contained** —
+it apk/apt-gets `python3 py3-pip jq curl` if the container doesn't
+already have them, then pip-installs `requirements.txt`. So the only
+real requirement is that the cronicled container is alpine or
+debian-based (the stock alpine cronicled image qualifies).
 
-- `python3` + `pip3` (the `install_deps` task pip-installs into `~/.local`)
-- `curl` + `jq` (delivery step)
-
-If your image is the stock alpine cronicled, you may need to bake these in:
-
-```dockerfile
-RUN apk add --no-cache python3 py3-pip curl jq
-```
+Re-runs of `install_deps` are ~0s once everything's cached.
 
 ## Deploying via cronicle UI
 

@@ -14,11 +14,11 @@
 //
 // Runtime expectations of the cronicled container:
 //
-//   - python3 + pip3 (the `install_deps` task `pip install --user`s
-//     into ~/.local/lib/python*/site-packages; on alpine images you
-//     may need py3-pip baked in)
-//   - curl + jq (for the Slack delivery step — both standard on the
-//     stock cronicled image)
+//   The `install_deps` task runs scripts/setup.sh which apk/apt-get
+//   installs python3, pip3, jq, and curl when missing, then pip-installs
+//   requirements.txt. Net effect: the only thing the container actually
+//   needs is sh + a supported package manager (alpine or debian). The
+//   stock cronicled alpine image qualifies.
 //
 // To init a fresh cronicle project from this repo:
 //   1. cronicle UI → New project → Init from repo
@@ -43,12 +43,11 @@ schedule "rivian_daily" {
     branch = "main"
   }
 
-  // 1. Install Python deps. `pip install --user` lands in HOME so
-  // subsequent task containers in the same run share the install
-  // (they share /work, which is where the scratch dir lives too).
-  // Idempotent — pip is a no-op when everything's already on disk.
+  // 1. Self-contained setup: scripts/setup.sh installs python3, pip3,
+  // jq, and curl if the container's missing any, then pip-installs
+  // requirements.txt. Idempotent — re-runs are ~0s.
   task "install_deps" {
-    command = ["sh", "-c", "pip3 install --user --no-warn-script-location -r requirements.txt"]
+    command = ["sh", "scripts/setup.sh"]
   }
 
   // 2. Scrape Reddit. Writes a slim JSON array of posts to the
