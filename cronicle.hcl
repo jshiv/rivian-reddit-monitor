@@ -26,22 +26,23 @@
 //   3. populate ANTHROPIC_API_KEY + SLACK_WEBHOOK_URL on the
 //      Secrets page
 
+// Top-level repo block: this is the marker that tells cronicle-infra
+// "this project is managed by a repo" (Mode A). cronicled inherits
+// it as the per-schedule code source, and the UI shows the "Synced
+// from" banner + a Sync-now button. Cronicle's runtime propagates
+// the top-level repo down to every schedule so each task workdir
+// is a fresh clone — same idempotent fetch+checkout pipeline as a
+// schedule-level repo, just declared once at the top.
+repo {
+  url    = "https://github.com/jshiv/rivian-reddit-monitor.git"
+  branch = "main"
+}
+
 schedule "rivian_daily" {
   // 09:00 local. Adjust the timezone to your team's morning if you're
   // not on the West Coast.
   cron     = "0 9 * * *"
   timezone = "America/Los_Angeles"
-
-  // Schedule-level repo block: cronicled clones this into the task
-  // workspace before each task runs (idempotent — subsequent runs
-  // do `git fetch` + checkout the latest commit on the branch).
-  // Source code (scripts/, requirements.txt) stays in sync with the
-  // repo automatically; the cronicle.hcl itself syncs only via
-  // cronicle-infra's repo-init flow or the manual "Sync now" button.
-  repo {
-    url    = "https://github.com/jshiv/rivian-reddit-monitor.git"
-    branch = "main"
-  }
 
   // 1. Self-contained setup: scripts/setup.sh installs python3, pip3,
   // jq, and curl if the container's missing any, then pip-installs
