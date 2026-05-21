@@ -53,7 +53,13 @@ fi
 
 echo ">>> $(python3 --version)"
 echo ">>> $(pip3 --version)"
-echo ">>> pip3 install --user -r requirements.txt"
-pip3 install --user --no-warn-script-location -r requirements.txt
+# --break-system-packages opts out of PEP 668's "externally-managed-environment"
+# check. Alpine 3.20+ enforces it, so a plain `pip install --user` fails with
+# "This environment is externally managed." The cronicled task container is
+# ephemeral, so installing into the system python's user-site is fine — the
+# "system" being protected here is going to be torn down anyway. A venv would
+# be cleaner but adds activation ceremony for every downstream task.
+echo ">>> pip3 install --user --break-system-packages -r requirements.txt"
+pip3 install --user --break-system-packages --no-warn-script-location -r requirements.txt
 
 echo ">>> setup complete"
