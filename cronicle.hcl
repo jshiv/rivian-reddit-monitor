@@ -41,7 +41,7 @@ repo {
 schedule "rivian_daily" {
   // 09:00 local. Adjust the timezone to your team's morning if you're
   // not on the West Coast.
-  cron     = "0 10 * * *"
+  cron     = "0 9 * * *"
   timezone = "America/Los_Angeles"
 
   // 1. Self-contained setup: scripts/setup.sh installs python3, pip3,
